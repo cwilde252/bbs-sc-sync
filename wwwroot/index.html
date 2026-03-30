@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafetyCulture Sync</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: #0f3460;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #0f3460;
+      margin-bottom: 1rem;
+      padding-bottom: .5rem;
+      border-bottom: 2px solid #e8eaf0;
+    }
+
+    .field { margin-bottom: 1rem; }
+
+    label {
+      display: block;
+      font-size: .85rem;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: .3rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: .5rem .75rem;
+      border: 1px solid #ccd;
+      border-radius: 6px;
+      font-size: .9rem;
+      background: #fafbfc;
+      transition: border-color .15s;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #4361ee;
+      background: #fff;
+    }
+
+    input[type="file"] {
+      display: block;
+      width: 100%;
+      padding: .5rem;
+      border: 2px dashed #ccd;
+      border-radius: 6px;
+      font-size: .9rem;
+      background: #fafbfc;
+      cursor: pointer;
+    }
+
+    input[type="file"]:hover { border-color: #4361ee; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: .75rem;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-top: .25rem;
+    }
+
+    .checkbox-row input[type="checkbox"] { width: 1rem; height: 1rem; cursor: pointer; }
+    .checkbox-row label { margin-bottom: 0; font-weight: 500; cursor: pointer; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .6rem 1.4rem;
+      border: none;
+      border-radius: 6px;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+    }
+
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn:not(:disabled):active { transform: scale(.97); }
+
+    .btn-primary { background: #4361ee; color: #fff; }
+    .btn-primary:not(:disabled):hover { background: #3451d1; }
+
+    .btn-success { background: #06b6a0; color: #fff; }
+    .btn-success:not(:disabled):hover { background: #059a86; }
+
+    #section-config { display: none; }
+
+    .result-box {
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-top: .5rem;
+    }
+
+    .result-box.success { background: #ecfdf5; border: 1px solid #6ee7b7; }
+    .result-box.error   { background: #fef2f2; border: 1px solid #fca5a5; }
+    .result-box.info    { background: #eff6ff; border: 1px solid #93c5fd; }
+
+    .result-box h3 { font-size: .95rem; margin-bottom: .75rem; }
+
+    .stats {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stat { text-align: center; }
+    .stat .num { font-size: 1.8rem; font-weight: 700; line-height: 1; }
+    .stat .lbl { font-size: .75rem; color: #666; margin-top: .2rem; }
+    .stat.created .num { color: #059669; }
+    .stat.skipped .num { color: #d97706; }
+    .stat.failed  .num { color: #dc2626; }
+
+    .log-area {
+      background: #1a1a2e;
+      color: #a8d8ea;
+      border-radius: 6px;
+      padding: .75rem 1rem;
+      font-family: monospace;
+      font-size: .8rem;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      margin-top: .75rem;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 1rem; height: 1rem;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .tag-dryrun {
+      display: inline-block;
+      background: #fef3c7;
+      color: #92400e;
+      font-size: .75rem;
+      font-weight: 600;
+      padding: .1rem .5rem;
+      border-radius: 4px;
+      margin-left: .5rem;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>SafetyCulture Sync</h1>
+
+  <!-- Step 1: Upload -->
+  <div class="card">
+    <h2>1 · Excel-Datei auswählen</h2>
+    <div class="field">
+      <label for="excelFile">Excel-Datei (.xlsx)</label>
+      <input type="file" id="excelFile" accept=".xlsx" />
+    </div>
+    <button class="btn btn-primary" id="btnPreview" disabled>
+      Vorschau laden
+    </button>
+    <div id="previewStatus" style="margin-top:.6rem; font-size:.85rem; color:#666;"></div>
+  </div>
+
+  <!-- Step 2: Configuration -->
+  <div id="section-config">
+    <div class="card">
+      <h2>2 · Worksheet &amp; Startzeile</h2>
+      <div class="grid-2">
+        <div class="field">
+          <label for="sheetSelect">Worksheet</label>
+          <select id="sheetSelect"></select>
+        </div>
+        <div class="field">
+          <label for="startRow">Ab Zeile (1 = erste Zeile)</label>
+          <input type="number" id="startRow" value="2" min="1" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3 · Spalten-Zuordnung</h2>
+      <div class="grid-2">
+        <div class="field">
+          <label for="colFilialNr">Filial-Nr *</label>
+          <select id="colFilialNr"></select>
+        </div>
+        <div class="field">
+          <label for="colStrasse">Straße *</label>
+          <select id="colStrasse"></select>
+        </div>
+        <div class="field">
+          <label for="colPlz">PLZ *</label>
+          <select id="colPlz"></select>
+        </div>
+        <div class="field">
+          <label for="colOrt">Ort *</label>
+          <select id="colOrt"></select>
+        </div>
+        <div class="field">
+          <label for="colNameErw">Namens-Erweiterung</label>
+          <select id="colNameErw"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>4 · Sync-Parameter</h2>
+      <div class="grid-2">
+        <div class="field">
+          <label for="gesellschaft">Gesellschaft *</label>
+          <input type="text" id="gesellschaft" placeholder="z. B. Lidl DE" />
+        </div>
+        <div class="field">
+          <label for="responseSet">Response-Set (optional)</label>
+          <input type="text" id="responseSet" placeholder="Name des Response-Sets" />
+        </div>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="dryRun" checked />
+        <label for="dryRun">Dry-Run (kein echter Schreibzugriff)</label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>5 · Sync starten</h2>
+      <button class="btn btn-success" id="btnSync" disabled>
+        Sync starten
+      </button>
+      <div id="syncResult" style="margin-top:1rem;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── State ────────────────────────────────────────────────────────────────────
+  let preview = null; // WorkbookPreview JSON
+
+  // ─── Elements ────────────────────────────────────────────────────────────────
+  const excelFile      = document.getElementById('excelFile');
+  const btnPreview     = document.getElementById('btnPreview');
+  const previewStatus  = document.getElementById('previewStatus');
+  const sectionConfig  = document.getElementById('section-config');
+  const sheetSelect    = document.getElementById('sheetSelect');
+  const startRow       = document.getElementById('startRow');
+  const colSelects     = {
+    filialNr:   document.getElementById('colFilialNr'),
+    strasse:    document.getElementById('colStrasse'),
+    plz:        document.getElementById('colPlz'),
+    ort:        document.getElementById('colOrt'),
+    nameErw:    document.getElementById('colNameErw'),
+  };
+  const gesellschaft   = document.getElementById('gesellschaft');
+  const responseSet    = document.getElementById('responseSet');
+  const dryRun         = document.getElementById('dryRun');
+  const btnSync        = document.getElementById('btnSync');
+  const syncResult     = document.getElementById('syncResult');
+
+  // ─── File-Input ───────────────────────────────────────────────────────────────
+  excelFile.addEventListener('change', () => {
+    btnPreview.disabled = !excelFile.files?.length;
+    sectionConfig.style.display = 'none';
+    preview = null;
+    syncResult.innerHTML = '';
+  });
+
+  // ─── Vorschau laden ───────────────────────────────────────────────────────────
+  btnPreview.addEventListener('click', async () => {
+    if (!excelFile.files?.length) return;
+
+    btnPreview.disabled = true;
+    btnPreview.innerHTML = '<span class="spinner"></span> Lade…';
+    previewStatus.textContent = '';
+
+    try {
+      const fd = new FormData();
+      fd.append('file', excelFile.files[0]);
+
+      const res = await fetch('/api/excel/preview', { method: 'POST', body: fd });
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || res.statusText);
+      }
+
+      preview = await res.json();
+      applyPreview();
+      sectionConfig.style.display = 'block';
+      previewStatus.textContent = `✓ ${preview.worksheets.length} Worksheet(s) geladen.`;
+    } catch (e) {
+      previewStatus.textContent = '✗ ' + e.message;
+    } finally {
+      btnPreview.disabled = false;
+      btnPreview.innerHTML = 'Vorschau neu laden';
+    }
+  });
+
+  function applyPreview() {
+    // Worksheets füllen
+    sheetSelect.innerHTML = preview.worksheets
+      .map(ws => `<option value="${ws.index}">${escHtml(ws.name)}</option>`)
+      .join('');
+    fillColumnDropdowns(0);
+  }
+
+  sheetSelect.addEventListener('change', () => {
+    fillColumnDropdowns(Number(sheetSelect.value));
+  });
+
+  function fillColumnDropdowns(sheetIdx) {
+    const ws = preview.worksheets.find(w => w.index === sheetIdx);
+    if (!ws) return;
+
+    const options = ws.headers
+      .map((h, i) => `<option value="${i}">${i}: ${escHtml(h)}</option>`)
+      .join('');
+
+    // Sinnvolle Defaults anhand von Header-Namen erraten
+    const defaults = guessDefaults(ws.headers);
+
+    for (const [key, sel] of Object.entries(colSelects)) {
+      sel.innerHTML = options;
+      if (defaults[key] !== undefined) sel.value = String(defaults[key]);
+    }
+
+    validateForm();
+  }
+
+  function guessDefaults(headers) {
+    const lc = headers.map(h => h.toLowerCase());
+    const find = (...terms) => lc.findIndex(h => terms.some(t => h.includes(t)));
+    return {
+      filialNr: find('filial', 'nr', 'nummer', 'id'),
+      strasse:  find('stra', 'street', 'adress'),
+      plz:      find('plz', 'zip', 'postal'),
+      ort:      find('ort', 'city', 'stadt'),
+      nameErw:  find('erweiter', 'extension', 'zusatz', 'lidl'),
+    };
+  }
+
+  // ─── Formularvalidierung ──────────────────────────────────────────────────────
+  gesellschaft.addEventListener('input', validateForm);
+
+  function validateForm() {
+    btnSync.disabled = !(preview && gesellschaft.value.trim());
+  }
+
+  // ─── Sync starten ─────────────────────────────────────────────────────────────
+  btnSync.addEventListener('click', async () => {
+    if (!excelFile.files?.length || !gesellschaft.value.trim()) return;
+
+    btnSync.disabled = true;
+    btnSync.innerHTML = '<span class="spinner"></span> Sync läuft…';
+    syncResult.innerHTML = '';
+
+    try {
+      const fd = new FormData();
+      fd.append('file',               excelFile.files[0]);
+      fd.append('gesellschaft',       gesellschaft.value.trim());
+      fd.append('responseSet',        responseSet.value.trim());
+      fd.append('sheetIndex',         sheetSelect.value);
+      fd.append('startRow',           String(Number(startRow.value) - 1)); // UI ist 1-basiert → 0-basiert
+      fd.append('filialNrCol',        colSelects.filialNr.value);
+      fd.append('strasseCol',         colSelects.strasse.value);
+      fd.append('plzCol',             colSelects.plz.value);
+      fd.append('ortCol',             colSelects.ort.value);
+      fd.append('nameErweiterungCol', colSelects.nameErw.value);
+      fd.append('dryRun',             dryRun.checked ? 'true' : 'false');
+
+      const res = await fetch('/api/sync', { method: 'POST', body: fd });
+      const json = await res.json();
+
+      if (!res.ok) {
+        renderError(json.error || JSON.stringify(json));
+        return;
+      }
+
+      renderResult(json);
+    } catch (e) {
+      renderError(e.message);
+    } finally {
+      btnSync.disabled = false;
+      btnSync.innerHTML = 'Sync starten';
+    }
+  });
+
+  function renderResult(data) {
+    const isDry    = data.dryRun;
+    const syncRep  = data.syncReport;
+    const rsRep    = data.responseSetReport;
+
+    let html = `<div class="result-box ${syncRep.failed > 0 ? 'error' : 'success'}">`;
+    html += `<h3>Sync abgeschlossen${isDry ? '<span class="tag-dryrun">DRY-RUN</span>' : ''}</h3>`;
+    html += `<div class="stats">
+      <div class="stat created"><div class="num">${syncRep.created}</div><div class="lbl">Erstellt</div></div>
+      <div class="stat skipped"><div class="num">${syncRep.skipped}</div><div class="lbl">Übersprungen</div></div>
+      <div class="stat failed"><div class="num">${syncRep.failed}</div><div class="lbl">Fehler</div></div>
+    </div>`;
+
+    if (rsRep) {
+      html += `<hr style="margin:.75rem 0;border-color:#ddd">`;
+      html += `<p style="font-size:.85rem;font-weight:600;margin-bottom:.5rem">Response-Set</p>`;
+      html += `<div class="stats">
+        <div class="stat created"><div class="num">${rsRep.created}</div><div class="lbl">Erstellt</div></div>
+        <div class="stat skipped"><div class="num">${rsRep.skipped}</div><div class="lbl">Übersprungen</div></div>
+        <div class="stat failed"><div class="num">${rsRep.failed}</div><div class="lbl">Fehler</div></div>
+      </div>`;
+    }
+
+    if (data.log?.length) {
+      html += `<div class="log-area">${escHtml(data.log.join('\n'))}</div>`;
+    }
+
+    html += `</div>`;
+    syncResult.innerHTML = html;
+  }
+
+  function renderError(msg) {
+    syncResult.innerHTML = `<div class="result-box error"><h3>Fehler</h3><p style="font-size:.85rem">${escHtml(msg)}</p></div>`;
+  }
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+</script>
+</body>
+</html>
