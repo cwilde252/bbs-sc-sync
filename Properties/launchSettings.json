@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SafetyCultureSync": {
+      "commandName": "Project",
+      "commandLineArgs": "--gesellschaft \"221HER\""
+    }
+  }
+}
