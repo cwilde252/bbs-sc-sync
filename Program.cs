@@ -215,6 +215,7 @@ static async Task<int> RunWebAsync(string[] args)
     var app = builder.Build();
 
     app.UseStaticFiles();
+    app.UseAntiforgery();
 
     // ── GET /api/config ───────────────────────────────────────────────────────
     app.MapGet("/api/config", (IOptions<SyncOptions> syncOpts) =>
