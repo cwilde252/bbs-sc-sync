@@ -2,14 +2,18 @@ using DevExpress.Spreadsheet;
 
 namespace SafetyCultureSync.WebApi;
 
-public record WorksheetPreview(int Index, string Name, IReadOnlyList<string> Headers);
+public record WorksheetPreview(
+    int Index,
+    string Name,
+    IReadOnlyList<string> Headers,
+    IReadOnlyList<IReadOnlyList<string>> Rows);
+
 public record WorkbookPreview(IReadOnlyList<WorksheetPreview> Worksheets);
 
-/// <summary>
-/// Liest Worksheet-Namen und Header-Zeilen aus einem Excel-Stream (ohne Datenzeilen).
-/// </summary>
 public sealed class ExcelPreviewService
 {
+    private const int PreviewRowCount = 10;
+
     public WorkbookPreview GetPreview(Stream excelStream)
     {
         using var workbook = new Workbook();
@@ -21,7 +25,8 @@ public sealed class ExcelPreviewService
         {
             var sheet   = workbook.Worksheets[i];
             var headers = ReadHeaders(sheet);
-            worksheets.Add(new WorksheetPreview(i, sheet.Name, headers));
+            var rows    = ReadRows(sheet, headers.Count);
+            worksheets.Add(new WorksheetPreview(i, sheet.Name, headers, rows));
         }
 
         return new WorkbookPreview(worksheets);
@@ -39,11 +44,30 @@ public sealed class ExcelPreviewService
         for (int c = 0; c <= lastCol; c++)
         {
             var value = sheet[0, c].Value.ToString().Trim();
-            // Fallback: Spaltenbuchstabe wenn Header leer
             headers.Add(string.IsNullOrEmpty(value) ? ColumnLetter(c) : value);
         }
 
         return headers;
+    }
+
+    private static IReadOnlyList<IReadOnlyList<string>> ReadRows(Worksheet sheet, int colCount)
+    {
+        var usedRange = sheet.GetUsedRange();
+        if (usedRange == null)
+            return [];
+
+        int lastRow = Math.Min(usedRange.BottomRowIndex, PreviewRowCount); // Zeilen 1–10
+        var rows = new List<IReadOnlyList<string>>(lastRow);
+
+        for (int r = 1; r <= lastRow; r++)
+        {
+            var cells = new List<string>(colCount);
+            for (int c = 0; c < colCount; c++)
+                cells.Add(sheet[r, c].Value.ToString().Trim());
+            rows.Add(cells);
+        }
+
+        return rows;
     }
 
     private static string ColumnLetter(int index)

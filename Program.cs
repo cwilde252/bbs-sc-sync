@@ -209,13 +209,16 @@ static async Task<int> RunWebAsync(string[] args)
 
     builder.Services.AddTransient<ExcelReaderService>();
     builder.Services.AddTransient<SyncOrchestrator>();
-    builder.Services.AddTransient<ResponseSetService>();
     builder.Services.AddTransient<ReportService>();
     builder.Services.AddTransient<ExcelPreviewService>();
 
     var app = builder.Build();
 
     app.UseStaticFiles();
+
+    // ── GET /api/config ───────────────────────────────────────────────────────
+    app.MapGet("/api/config", (IOptions<SyncOptions> syncOpts) =>
+        Results.Ok(new { responseSetName = syncOpts.Value.ResponseSetName }));
 
     // ── GET / → Web-UI ────────────────────────────────────────────────────────
     app.MapGet("/", () => Results.File(
@@ -248,6 +251,7 @@ static async Task<int> RunWebAsync(string[] args)
         ExcelReaderService excelReader,
         SyncOrchestrator orchestrator,
         ResponseSetService rsService,
+        IOptions<SyncOptions> syncOpts,
         ILogger<Program> logger) =>
     {
         var form = await req.ReadFormAsync();
@@ -261,6 +265,8 @@ static async Task<int> RunWebAsync(string[] args)
             return Results.BadRequest(new { error = "Gesellschaft ist erforderlich." });
 
         var responseSetName = form["responseSet"].ToString().Trim();
+        if (string.IsNullOrEmpty(responseSetName))
+            responseSetName = syncOpts.Value.ResponseSetName;
         var dryRun          = form["dryRun"].ToString().Equals("true", StringComparison.OrdinalIgnoreCase);
 
         if (!int.TryParse(form["sheetIndex"],         out var sheetIndex))         sheetIndex         = 0;

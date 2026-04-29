@@ -193,6 +193,42 @@
       border-radius: 4px;
       margin-left: .5rem;
     }
+
+    .preview-table-wrap {
+      overflow-x: auto;
+      margin-top: .75rem;
+      border-radius: 6px;
+      border: 1px solid #e8eaf0;
+    }
+
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .8rem;
+    }
+
+    .preview-table th {
+      background: #f0f2f5;
+      padding: .4rem .6rem;
+      text-align: left;
+      font-weight: 600;
+      white-space: nowrap;
+      border-bottom: 2px solid #e8eaf0;
+    }
+
+    .preview-table td {
+      padding: .35rem .6rem;
+      border-bottom: 1px solid #f0f2f5;
+      white-space: nowrap;
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .preview-table tr:last-child td { border-bottom: none; }
+
+    .preview-table th.col-active,
+    .preview-table td.col-active { background: #eff6ff; }
   </style>
 </head>
 <body>
@@ -254,6 +290,11 @@
       </div>
     </div>
 
+    <div class="card" id="cardPreviewTable" style="display:none;">
+      <h2>3b · Datenvorschau (erste 10 Zeilen)</h2>
+      <div id="previewTableWrap"></div>
+    </div>
+
     <div class="card">
       <h2>4 · Sync-Parameter</h2>
       <div class="grid-2">
@@ -287,24 +328,37 @@
   let preview = null; // WorkbookPreview JSON
 
   // ─── Elements ────────────────────────────────────────────────────────────────
-  const excelFile      = document.getElementById('excelFile');
-  const btnPreview     = document.getElementById('btnPreview');
-  const previewStatus  = document.getElementById('previewStatus');
-  const sectionConfig  = document.getElementById('section-config');
-  const sheetSelect    = document.getElementById('sheetSelect');
-  const startRow       = document.getElementById('startRow');
-  const colSelects     = {
+  const excelFile        = document.getElementById('excelFile');
+  const btnPreview       = document.getElementById('btnPreview');
+  const previewStatus    = document.getElementById('previewStatus');
+  const sectionConfig    = document.getElementById('section-config');
+  const sheetSelect      = document.getElementById('sheetSelect');
+  const startRow         = document.getElementById('startRow');
+  const colSelects       = {
     filialNr:   document.getElementById('colFilialNr'),
     strasse:    document.getElementById('colStrasse'),
     plz:        document.getElementById('colPlz'),
     ort:        document.getElementById('colOrt'),
     nameErw:    document.getElementById('colNameErw'),
   };
-  const gesellschaft   = document.getElementById('gesellschaft');
-  const responseSet    = document.getElementById('responseSet');
-  const dryRun         = document.getElementById('dryRun');
-  const btnSync        = document.getElementById('btnSync');
-  const syncResult     = document.getElementById('syncResult');
+  const gesellschaft     = document.getElementById('gesellschaft');
+  const responseSet      = document.getElementById('responseSet');
+  const dryRun           = document.getElementById('dryRun');
+  const btnSync          = document.getElementById('btnSync');
+  const syncResult       = document.getElementById('syncResult');
+  const cardPreviewTable = document.getElementById('cardPreviewTable');
+  const previewTableWrap = document.getElementById('previewTableWrap');
+
+  // ─── Config-Prefill aus AppSettings ──────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const res = await fetch('/api/config');
+      if (res.ok) {
+        const cfg = await res.json();
+        if (cfg.responseSetName) responseSet.value = cfg.responseSetName;
+      }
+    } catch {}
+  });
 
   // ─── File-Input ───────────────────────────────────────────────────────────────
   excelFile.addEventListener('change', () => {
@@ -356,6 +410,13 @@
     fillColumnDropdowns(Number(sheetSelect.value));
   });
 
+  for (const sel of Object.values(colSelects)) {
+    sel.addEventListener('change', () => {
+      const ws = preview?.worksheets.find(w => w.index === Number(sheetSelect.value));
+      if (ws) renderPreviewTable(ws);
+    });
+  }
+
   function fillColumnDropdowns(sheetIdx) {
     const ws = preview.worksheets.find(w => w.index === sheetIdx);
     if (!ws) return;
@@ -372,7 +433,37 @@
       if (defaults[key] !== undefined) sel.value = String(defaults[key]);
     }
 
+    renderPreviewTable(ws);
     validateForm();
+  }
+
+  function renderPreviewTable(ws) {
+    if (!ws.rows || ws.rows.length === 0) {
+      cardPreviewTable.style.display = 'none';
+      return;
+    }
+
+    const activeCols = new Set(Object.values(colSelects).map(s => Number(s.value)));
+
+    let html = '<div class="preview-table-wrap"><table class="preview-table"><thead><tr>';
+    ws.headers.forEach((h, i) => {
+      const cls = activeCols.has(i) ? ' class="col-active"' : '';
+      html += `<th${cls}>${escHtml(h)}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    for (const row of ws.rows) {
+      html += '<tr>';
+      row.forEach((cell, i) => {
+        const cls = activeCols.has(i) ? ' class="col-active"' : '';
+        html += `<td${cls} title="${escHtml(cell)}">${escHtml(cell)}</td>`;
+      });
+      html += '</tr>';
+    }
+
+    html += '</tbody></table></div>';
+    previewTableWrap.innerHTML = html;
+    cardPreviewTable.style.display = 'block';
   }
 
   function guessDefaults(headers) {
