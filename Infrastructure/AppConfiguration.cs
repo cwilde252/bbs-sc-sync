@@ -1,5 +1,19 @@
 namespace SafetyCultureSync.Infrastructure;
 
+/// <summary>
+/// Dynamisches Spalten-Mapping und Lese-Optionen für den Web-Upload-Endpunkt.
+/// </summary>
+public record ExcelReadOptions(
+    int SheetIndex,
+    /// <summary>0-basierter Zeilenindex der ersten Datenzeile (z. B. 1 = zweite Zeile = nach Header)</summary>
+    int StartRow,
+    int FilialNrCol,
+    int StrasseCol,
+    int PlzCol,
+    int OrtCol,
+    int NamensErweiterungCol);
+
+
 public sealed class SafetyCultureOptions
 {
     public const string Section = "SafetyCulture";

@@ -47,22 +47,46 @@ public sealed class ExcelReaderService
                 $"Excel-Datei nicht gefunden: '{path}'. " +
                 "Pfad in appsettings.json (Sync:ExcelFilePath) oder --Sync:ExcelFilePath prüfen.");
 
+        var options = new ExcelReadOptions(
+            SheetIndex:           _opts.SheetIndex,
+            StartRow:             1,
+            FilialNrCol:          Col.FilialNr,
+            StrasseCol:           Col.Strasse,
+            PlzCol:               Col.Plz,
+            OrtCol:               Col.Ort,
+            NamensErweiterungCol: Col.NamensErweiterung);
+
+        return ReadCore(path, options);
+    }
+
+    /// <summary>
+    /// Liest alle gültigen Zeilen mit dynamischem Spalten-Mapping (für den Web-Endpunkt).
+    /// </summary>
+    public IReadOnlyList<ExcelLocation> Read(string path, ExcelReadOptions options)
+    {
+        if (!File.Exists(path))
+            throw new FileNotFoundException($"Excel-Datei nicht gefunden: '{path}'.");
+
+        return ReadCore(path, options);
+    }
+
+    private IReadOnlyList<ExcelLocation> ReadCore(string path, ExcelReadOptions options)
+    {
         _logger.LogInformation("Lese Excel-Datei: {Path}", path);
 
         using var workbook = new Workbook();
         workbook.LoadDocument(path, DocumentFormat.Xlsx);
 
-        var sheet     = workbook.Worksheets[_opts.SheetIndex];
+        var sheet     = workbook.Worksheets[options.SheetIndex];
         var usedRange = sheet.GetUsedRange();
         int lastRow   = usedRange.BottomRowIndex;
 
         var locations = new List<ExcelLocation>();
         int skipped   = 0;
 
-        // Zeile 0 = Header → ab Zeile 1 lesen
-        for (int r = 1; r <= lastRow; r++)
+        for (int r = options.StartRow; r <= lastRow; r++)
         {
-            var filialNr = sheet[r, Col.FilialNr].Value.ToString().Trim();
+            var filialNr = sheet[r, options.FilialNrCol].Value.ToString().Trim();
 
             if (string.IsNullOrEmpty(filialNr))
             {
@@ -73,10 +97,10 @@ public sealed class ExcelReaderService
 
             locations.Add(new ExcelLocation(
                 FilialNr:          filialNr,
-                Strasse:           sheet[r, Col.Strasse].Value.ToString().Trim(),
-                Plz:               sheet[r, Col.Plz].Value.ToString().Trim(),
-                Ort:               sheet[r, Col.Ort].Value.ToString().Trim(),
-                NamensErweiterung: sheet[r, Col.NamensErweiterung].Value.ToString().Trim()
+                Strasse:           sheet[r, options.StrasseCol].Value.ToString().Trim(),
+                Plz:               sheet[r, options.PlzCol].Value.ToString().Trim(),
+                Ort:               sheet[r, options.OrtCol].Value.ToString().Trim(),
+                NamensErweiterung: sheet[r, options.NamensErweiterungCol].Value.ToString().Trim()
             ));
         }
 

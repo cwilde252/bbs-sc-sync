@@ -47,6 +47,7 @@ public sealed class ResponseSetService
     public async Task<ResponseSetSyncReport> RunAsync(
         IReadOnlyList<ExcelLocation> locations,
         string responseSetName,
+        bool? dryRunOverride = null,
         CancellationToken ct = default)
     {
         // 1. Response Set per Name finden
@@ -59,6 +60,7 @@ public sealed class ResponseSetService
         _logger.LogInformation(
             "Bestehende Antworten im Set: {Count}", existing.Count);
 
+        var isDryRun = dryRunOverride ?? _opts.DryRun;
         var report = new ResponseSetSyncReport
         {
             ResponseSetId = responseSet.Id,
@@ -69,7 +71,7 @@ public sealed class ResponseSetService
         foreach (var loc in locations)
         {
             ct.ThrowIfCancellationRequested();
-            await ProcessLocationAsync(loc, responseSet.Id, existing, report, ct);
+            await ProcessLocationAsync(loc, responseSet.Id, existing, report, isDryRun, ct);
         }
 
         return report;
@@ -126,6 +128,7 @@ public sealed class ResponseSetService
         string responseSetId,
         HashSet<string> existing,
         ResponseSetSyncReport report,
+        bool isDryRun,
         CancellationToken ct)
     {
         // Zeilen ohne NamensErweiterung: Hinweis + überspringen
@@ -148,7 +151,7 @@ public sealed class ResponseSetService
         }
 
         // Neu hinzufügen
-        if (_opts.DryRun)
+        if (isDryRun)
         {
             _logger.LogInformation("[DRY-RUN] Würde hinzufügen: '{Label}'", label);
             existing.Add(label); // verhindert doppelte DryRun-Logs bei duplizierten Excel-Zeilen

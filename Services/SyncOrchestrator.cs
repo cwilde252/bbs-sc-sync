@@ -37,13 +37,15 @@ public sealed class SyncOrchestrator
     public async Task<SyncReport> RunAsync(
         IReadOnlyList<ExcelLocation> locations,
         string gesellschaftName,
+        bool? dryRunOverride = null,
         CancellationToken ct = default)
     {
-        if (_opts.DryRun)
+        var isDryRun = dryRunOverride ?? _opts.DryRun;
+        if (isDryRun)
             _logger.LogWarning("=== DRY-RUN MODUS — keine API-Schreibzugriffe ===");
 
         // 1. Gesellschaft-Folder suchen — muss existieren
-        var gesellschaft = await FindGesellschaftAsync(gesellschaftName, ct);
+        var gesellschaft = await FindGesellschaftAsync(gesellschaftName, isDryRun, ct);
 
         // Optionaler Override für meta_label (z. B. wenn API kein MetaLabel liefert)
         if (_opts.AreaLabel is not null)
@@ -81,7 +83,7 @@ public sealed class SyncOrchestrator
         foreach (var loc in locations)
         {
             ct.ThrowIfCancellationRequested();
-            await ProcessLocationAsync(loc, gesellschaft, filialMetaLabel, index, report, ct);
+            await ProcessLocationAsync(loc, gesellschaft, filialMetaLabel, index, report, isDryRun, ct);
         }
 
         return report;
@@ -90,7 +92,7 @@ public sealed class SyncOrchestrator
     // ─── Gesellschaft auflösen ────────────────────────────────────────────────
 
     private async Task<DirectoryFolder> FindGesellschaftAsync(
-        string name, CancellationToken ct)
+        string name, bool isDryRun, CancellationToken ct)
     {
         _logger.LogInformation("Suche Gesellschaft: '{Name}'", name);
 
@@ -135,7 +137,7 @@ public sealed class SyncOrchestrator
                 throw new OperationCanceledException("Abbruch durch User.");
         }
 
-        if (_opts.DryRun)
+        if (isDryRun)
         {
             _logger.LogInformation(
                 "[DRY-RUN] Würde Gesellschaft anlegen: '{Name}' (meta_label: {Label})",
@@ -158,6 +160,7 @@ public sealed class SyncOrchestrator
         string filialMetaLabel,
         Dictionary<string, DirectoryFolder> index,
         SyncReport report,
+        bool isDryRun,
         CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(loc.FilialNr))
@@ -185,7 +188,7 @@ public sealed class SyncOrchestrator
             return;
         }
 
-        if (_opts.DryRun)
+        if (isDryRun)
         {
             _logger.LogInformation(
                 "[DRY-RUN] Würde anlegen: '{Name}' unter '{Gesellschaft}' (meta_label: {Label})",
