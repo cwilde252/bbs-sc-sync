@@ -198,6 +198,7 @@ static async Task<int> RunWebAsync(string[] args)
         builder.Configuration.GetSection(SyncOptions.Section));
 
     builder.Services.AddTransient<HttpRetryHandler>();
+    builder.Services.AddAntiforgery();
 
     builder.Services.AddHttpClient<SafetyCultureClient>((sp, client) =>
         ConfigureClient(sp, client))
@@ -244,7 +245,7 @@ static async Task<int> RunWebAsync(string[] args)
         {
             return Results.BadRequest(ex.Message);
         }
-    });
+    }).DisableAntiforgery();
 
     // ── POST /api/sync ────────────────────────────────────────────────────────
     app.MapPost("/api/sync", async (
@@ -348,7 +349,7 @@ static async Task<int> RunWebAsync(string[] args)
         {
             if (File.Exists(tmpPath)) File.Delete(tmpPath);
         }
-    });
+    }).DisableAntiforgery();
 
     var logger2 = app.Services.GetRequiredService<ILogger<Program>>();
     logger2.LogInformation("Web-UI verfügbar unter: http://localhost:5000");

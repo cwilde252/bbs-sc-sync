@@ -4,342 +4,707 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SafetyCulture Sync</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg:          #f5f6f4;
+      --surface:     #ffffff;
+      --surface-2:   #f9faf8;
+      --border:      #e2e5de;
+      --border-soft: #eceee9;
+      --text:        #1a1f18;
+      --text-mid:    #4a5244;
+      --text-soft:   #7a8573;
+
+      --green:       #2d6a4f;
+      --green-hover: #245a41;
+      --green-light: #d8eddf;
+      --green-pale:  #f0f8f3;
+      --green-glow:  rgba(45,106,79,.12);
+
+      --amber:       #c07a1a;
+      --amber-bg:    #fef8ee;
+      --amber-text:  #8a5210;
+      --amber-border:#e8c47a;
+
+      --red:         #c0392b;
+      --red-bg:      #fdf2f0;
+      --red-border:  #e8aea8;
+
+      --teal-bg:     #edf7f4;
+      --teal-border: #a8d8c8;
+
+      --step-dot:    2.25rem;
+      --r:           10px;
+      --r-lg:        14px;
+      --shadow-sm:   0 1px 2px rgba(0,0,0,.06);
+      --shadow:      0 2px 8px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-focus:0 0 0 3px var(--green-glow);
+      --transition:  .18s cubic-bezier(.4,0,.2,1);
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #f0f2f5;
-      color: #1a1a2e;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 15px;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      padding: 2rem 1rem;
+      padding: 2rem 1.25rem 4rem;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .container {
-      max-width: 780px;
+    /* ── Header ── */
+    .app-header {
+      max-width: 100%;
+      margin: 0 auto 2rem;
+      animation: fadeUp .4s ease both;
+    }
+
+    .wordmark {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: .5rem;
+    }
+
+    .app-icon {
+      width: 2.25rem;
+      height: 2.25rem;
+      background: var(--green);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(45,106,79,.3);
+    }
+
+    .app-icon svg {
+      width: 1.15rem;
+      height: 1.15rem;
+      color: white;
+    }
+
+    .app-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      color: var(--text);
+    }
+
+    .app-tagline {
+      font-size: .9rem;
+      color: var(--text-soft);
+      padding-left: 3rem;
+      font-weight: 400;
+    }
+
+    /* ── Flow ── */
+    .flow {
+      max-width: 100%;
       margin: 0 auto;
     }
 
-    h1 {
-      font-size: 1.6rem;
-      font-weight: 700;
+    .step {
+      display: grid;
+      grid-template-columns: var(--step-dot) 1fr;
+      gap: 0 1.1rem;
       margin-bottom: 1.5rem;
-      color: #0f3460;
+      animation: fadeUp .35s ease both;
     }
 
-    .card {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.08);
-      padding: 1.5rem;
-      margin-bottom: 1.25rem;
+    .step:nth-child(1) { animation-delay: .05s; }
+    .step:nth-child(2) { animation-delay: .1s; }
+
+    .step-spine {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .card h2 {
-      font-size: 1rem;
+    .step-num {
+      width: var(--step-dot);
+      height: var(--step-dot);
+      border-radius: 50%;
+      background: var(--green);
+      color: white;
+      font-size: .78rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(45,106,79,.25);
+      letter-spacing: 0;
+    }
+
+    .step-line {
+      flex: 1;
+      width: 2px;
+      background: var(--border);
+      margin: .4rem 0;
+      border-radius: 1px;
+    }
+
+    .step-body {
+      padding-top: .3rem;
+    }
+
+    .step-title {
+      font-size: .95rem;
       font-weight: 600;
-      color: #0f3460;
-      margin-bottom: 1rem;
-      padding-bottom: .5rem;
-      border-bottom: 2px solid #e8eaf0;
+      letter-spacing: -.015em;
+      color: var(--text);
+      margin-bottom: .65rem;
     }
 
-    .field { margin-bottom: 1rem; }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 1.1rem;
+      box-shadow: var(--shadow);
+      transition: box-shadow var(--transition);
+    }
+
+    .panel:focus-within {
+      box-shadow: var(--shadow), 0 0 0 3px var(--green-glow);
+    }
+
+    /* ── Form ── */
+    .field { margin-bottom: .7rem; }
+    .field:last-child { margin-bottom: 0; }
 
     label {
       display: block;
-      font-size: .85rem;
+      font-size: .76rem;
       font-weight: 600;
-      color: #444;
-      margin-bottom: .3rem;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      margin-bottom: .4rem;
     }
 
     input[type="text"],
     input[type="number"],
     select {
       width: 100%;
-      padding: .5rem .75rem;
-      border: 1px solid #ccd;
-      border-radius: 6px;
-      font-size: .9rem;
-      background: #fafbfc;
-      transition: border-color .15s;
+      padding: .65rem .9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .95rem;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8573' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right .85rem center;
+      padding-right: 2.5rem;
+    }
+
+    input[type="text"]:hover,
+    input[type="number"]:hover,
+    select:hover {
+      border-color: #c5c9be;
     }
 
     input[type="text"]:focus,
     input[type="number"]:focus,
     select:focus {
       outline: none;
-      border-color: #4361ee;
-      background: #fff;
+      border-color: var(--green);
+      box-shadow: var(--shadow-focus);
+      background: var(--green-pale);
     }
-
-    input[type="file"] {
-      display: block;
-      width: 100%;
-      padding: .5rem;
-      border: 2px dashed #ccd;
-      border-radius: 6px;
-      font-size: .9rem;
-      background: #fafbfc;
-      cursor: pointer;
-    }
-
-    input[type="file"]:hover { border-color: #4361ee; }
 
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: .75rem;
+      gap: .7rem;
     }
 
-    .grid-3 {
+    .col-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: .75rem;
+      grid-template-columns: 1fr 1fr;
+      gap: .6rem;
     }
 
+    /* ── File drop ── */
+    .file-drop {
+      position: relative;
+      border: 2px dashed var(--border);
+      border-radius: var(--r-lg);
+      padding: 1.4rem 1.25rem;
+      text-align: center;
+      background: var(--green-pale);
+      transition: border-color var(--transition), background var(--transition), transform var(--transition);
+      cursor: pointer;
+    }
+
+    .file-drop:hover {
+      border-color: var(--green);
+      background: var(--green-light);
+      transform: translateY(-1px);
+    }
+
+    .file-drop.has-file {
+      border-color: var(--green);
+      border-style: solid;
+      background: var(--green-light);
+    }
+
+    .file-drop input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .file-icon {
+      width: 2rem;
+      height: 2rem;
+      margin: 0 auto .5rem;
+      color: var(--green);
+    }
+
+    .file-label { font-size: .95rem; font-weight: 600; color: var(--text); }
+    .file-hint  { font-size: .84rem; color: var(--text-soft); margin-top: .25rem; }
+    .file-name  { font-size: .88rem; font-weight: 600; color: var(--green); margin-top: .6rem; }
+
+    /* ── Checkbox ── */
     .checkbox-row {
       display: flex;
       align-items: center;
-      gap: .5rem;
-      margin-top: .25rem;
+      gap: .7rem;
+      padding: .75rem 1rem;
+      border-radius: 8px;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border-soft);
+      transition: border-color var(--transition), background var(--transition);
+      cursor: pointer;
     }
 
-    .checkbox-row input[type="checkbox"] { width: 1rem; height: 1rem; cursor: pointer; }
-    .checkbox-row label { margin-bottom: 0; font-weight: 500; cursor: pointer; }
+    .checkbox-row:hover {
+      border-color: var(--border);
+      background: #f3f4f1;
+    }
 
+    .checkbox-row input[type="checkbox"] {
+      width: 1.05rem;
+      height: 1.05rem;
+      cursor: pointer;
+      accent-color: var(--green);
+      flex-shrink: 0;
+    }
+
+    .checkbox-row label {
+      margin-bottom: 0;
+      font-size: .92rem;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    /* ── Buttons ── */
     .btn {
       display: inline-flex;
       align-items: center;
-      gap: .4rem;
-      padding: .6rem 1.4rem;
+      gap: .45rem;
+      padding: .7rem 1.6rem;
       border: none;
-      border-radius: 6px;
-      font-size: .95rem;
+      border-radius: 8px;
+      font-size: .92rem;
+      font-family: inherit;
       font-weight: 600;
+      letter-spacing: -.01em;
       cursor: pointer;
-      transition: opacity .15s, transform .1s;
+      transition: background var(--transition), opacity var(--transition), transform var(--transition), box-shadow var(--transition);
     }
 
-    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
     .btn:not(:disabled):active { transform: scale(.97); }
 
-    .btn-primary { background: #4361ee; color: #fff; }
-    .btn-primary:not(:disabled):hover { background: #3451d1; }
-
-    .btn-success { background: #06b6a0; color: #fff; }
-    .btn-success:not(:disabled):hover { background: #059a86; }
-
-    #section-config { display: none; }
-
-    .result-box {
-      border-radius: 8px;
-      padding: 1.25rem;
-      margin-top: .5rem;
+    .btn-primary {
+      background: var(--green);
+      color: white;
+      box-shadow: 0 2px 8px rgba(45,106,79,.25);
+    }
+    .btn-primary:not(:disabled):hover {
+      background: var(--green-hover);
+      box-shadow: 0 4px 12px rgba(45,106,79,.3);
+      transform: translateY(-1px);
     }
 
-    .result-box.success { background: #ecfdf5; border: 1px solid #6ee7b7; }
-    .result-box.error   { background: #fef2f2; border: 1px solid #fca5a5; }
-    .result-box.info    { background: #eff6ff; border: 1px solid #93c5fd; }
+    .btn-sm { padding: .55rem 1.2rem; font-size: .88rem; }
 
-    .result-box h3 { font-size: .95rem; margin-bottom: .75rem; }
-
-    .stats {
-      display: flex;
-      gap: 1.5rem;
-      flex-wrap: wrap;
+    /* ── Inline status ── */
+    .status {
+      font-size: .875rem;
+      color: var(--text-soft);
+      transition: color var(--transition);
     }
+    .status.ok  { color: var(--green); font-weight: 600; }
+    .status.err { color: var(--red); }
 
-    .stat { text-align: center; }
-    .stat .num { font-size: 1.8rem; font-weight: 700; line-height: 1; }
-    .stat .lbl { font-size: .75rem; color: #666; margin-top: .2rem; }
-    .stat.created .num { color: #059669; }
-    .stat.skipped .num { color: #d97706; }
-    .stat.failed  .num { color: #dc2626; }
-
-    .log-area {
-      background: #1a1a2e;
-      color: #a8d8ea;
-      border-radius: 6px;
-      padding: .75rem 1rem;
-      font-family: monospace;
-      font-size: .8rem;
-      max-height: 200px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      margin-top: .75rem;
-    }
-
-    .spinner {
-      display: inline-block;
-      width: 1rem; height: 1rem;
-      border: 2px solid rgba(255,255,255,.4);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      vertical-align: middle;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .tag-dryrun {
-      display: inline-block;
-      background: #fef3c7;
-      color: #92400e;
-      font-size: .75rem;
+    /* ── Subsection label ── */
+    .sub-label {
+      font-size: .73rem;
       font-weight: 600;
-      padding: .1rem .5rem;
-      border-radius: 4px;
-      margin-left: .5rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      margin-bottom: .75rem;
     }
 
-    .preview-table-wrap {
+    /* ── Preview table ── */
+    .preview-scroll {
       overflow-x: auto;
-      margin-top: .75rem;
-      border-radius: 6px;
-      border: 1px solid #e8eaf0;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      margin-top: .85rem;
     }
 
     .preview-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: .8rem;
+      font-size: .84rem;
+      white-space: nowrap;
+      font-family: 'DM Mono', monospace;
     }
 
     .preview-table th {
-      background: #f0f2f5;
-      padding: .4rem .6rem;
+      background: var(--surface-2);
+      padding: .5rem .75rem;
       text-align: left;
+      font-size: .72rem;
       font-weight: 600;
-      white-space: nowrap;
-      border-bottom: 2px solid #e8eaf0;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      border-bottom: 2px solid var(--border);
+      font-family: 'DM Sans', sans-serif;
     }
 
     .preview-table td {
-      padding: .35rem .6rem;
-      border-bottom: 1px solid #f0f2f5;
-      white-space: nowrap;
-      max-width: 160px;
+      padding: .35rem .65rem;
+      border-bottom: 1px solid var(--border-soft);
+      max-width: 220px;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: var(--text-mid);
     }
 
     .preview-table tr:last-child td { border-bottom: none; }
+    .preview-table tr:hover td { background: var(--surface-2); }
+    .preview-table th.col-active { background: var(--green-pale); color: var(--green); }
+    .preview-table td.col-active { background: var(--green-pale); color: var(--text); font-weight: 500; }
 
-    .preview-table th.col-active,
-    .preview-table td.col-active { background: #eff6ff; }
+    /* ── Result ── */
+    .result-panel {
+      border-radius: var(--r-lg);
+      padding: 1.1rem;
+      border: 1.5px solid;
+      animation: fadeUp .25s ease both;
+    }
+
+    .result-panel.success { background: var(--teal-bg); border-color: var(--teal-border); }
+    .result-panel.error   { background: var(--red-bg);  border-color: var(--red-border); }
+
+    .result-panel h3 {
+      font-size: .95rem;
+      font-weight: 700;
+      margin-bottom: .8rem;
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+    }
+
+    .badge-dryrun {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      background: var(--amber-bg);
+      color: var(--amber-text);
+      border: 1.5px solid var(--amber-border);
+      padding: .14rem .55rem;
+      border-radius: 5px;
+    }
+
+    .stats { display: flex; gap: 2.5rem; }
+
+    .stat .num {
+      font-size: 2.25rem;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -.05em;
+    }
+
+    .stat .lbl {
+      font-size: .73rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      margin-top: .25rem;
+    }
+
+    .stat.created .num { color: #2a6647; }
+    .stat.skipped .num { color: var(--amber); }
+    .stat.failed  .num { color: var(--red); }
+
+    .divider {
+      height: 1.5px;
+      background: var(--border);
+      margin: 1.1rem 0;
+      border-radius: 1px;
+    }
+
+    /* ── Log ── */
+    .log-area {
+      background: #1a1f18;
+      color: #a8c4a0;
+      border-radius: 8px;
+      padding: .9rem 1.1rem;
+      font-family: 'DM Mono', 'Cascadia Code', Consolas, monospace;
+      font-size: .82rem;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      margin-top: 1.1rem;
+      line-height: 1.7;
+      letter-spacing: .01em;
+    }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: inline-block;
+      width: .95rem;
+      height: .95rem;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+      vertical-align: middle;
+    }
+
+    /* ── Section reveal ── */
+    .section-reveal {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height .45s cubic-bezier(.4,0,.2,1), opacity .3s ease;
+    }
+
+    .section-reveal.visible {
+      max-height: 9999px;
+      opacity: 1;
+    }
+
+    @keyframes spin    { to { transform: rotate(360deg); } }
+    @keyframes fadeUp  { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+    .hidden { display: none !important; }
+
+    /* ── Responsive ── */
+    @media (max-width: 540px) {
+      .grid-2, .col-grid { grid-template-columns: 1fr; }
+      .stats { gap: 1.5rem; }
+      .app-tagline { padding-left: 0; }
+      body { padding: 1.25rem 1rem 3rem; }
+    }
   </style>
 </head>
 <body>
-<div class="container">
-  <h1>SafetyCulture Sync</h1>
+
+<div class="app-header">
+  <div class="wordmark">
+    <div class="app-icon">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2z"/>
+        <polyline points="6,10 9,13 14,8"/>
+      </svg>
+    </div>
+    <span class="app-name">SafetyCulture Sync</span>
+  </div>
+  <p class="app-tagline">Filialdaten aus Excel in SafetyCulture übertragen</p>
+</div>
+
+<div class="flow">
 
   <!-- Step 1: Upload -->
-  <div class="card">
-    <h2>1 · Excel-Datei auswählen</h2>
-    <div class="field">
-      <label for="excelFile">Excel-Datei (.xlsx)</label>
-      <input type="file" id="excelFile" accept=".xlsx" />
+  <div class="step">
+    <div class="step-spine">
+      <div class="step-num">1</div>
+      <div class="step-line"></div>
     </div>
-    <button class="btn btn-primary" id="btnPreview" disabled>
-      Vorschau laden
-    </button>
-    <div id="previewStatus" style="margin-top:.6rem; font-size:.85rem; color:#666;"></div>
+    <div class="step-body">
+      <p class="step-title">Excel-Datei auswählen</p>
+      <div class="panel">
+        <div class="file-drop" id="fileDrop">
+          <input type="file" id="excelFile" accept=".xlsx" />
+          <div class="file-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="12" y1="18" x2="12" y2="12"/>
+              <line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <p class="file-label">Datei auswählen oder hierher ziehen</p>
+          <p class="file-hint">.xlsx · Excel-Arbeitsmappe</p>
+          <p class="file-name hidden" id="fileName"></p>
+        </div>
+        <div style="margin-top:1rem; display:flex; align-items:center; gap:.85rem; flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" id="btnPreview" disabled>Vorschau laden</button>
+          <span class="status" id="previewStatus"></span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Step 2: Configuration -->
-  <div id="section-config">
-    <div class="card">
-      <h2>2 · Worksheet &amp; Startzeile</h2>
-      <div class="grid-2">
-        <div class="field">
-          <label for="sheetSelect">Worksheet</label>
-          <select id="sheetSelect"></select>
-        </div>
-        <div class="field">
-          <label for="startRow">Ab Zeile (1 = erste Zeile)</label>
-          <input type="number" id="startRow" value="2" min="1" />
+  <!-- Steps 2–5, shown after preview -->
+  <div id="section-config" class="section-reveal">
+
+    <!-- Step 2: Sheet & start row -->
+    <div class="step" style="animation-delay:.05s">
+      <div class="step-spine">
+        <div class="step-num">2</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-body">
+        <p class="step-title">Worksheet &amp; Startzeile</p>
+        <div class="panel">
+          <div class="grid-2">
+            <div class="field">
+              <label for="sheetSelect">Worksheet</label>
+              <select id="sheetSelect"></select>
+            </div>
+            <div class="field">
+              <label for="startRow">Ab Zeile <span style="text-transform:none;letter-spacing:0;font-weight:400">(1 = erste)</span></label>
+              <input type="number" id="startRow" value="2" min="1" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="card">
-      <h2>3 · Spalten-Zuordnung</h2>
-      <div class="grid-2">
-        <div class="field">
-          <label for="colFilialNr">Filial-Nr *</label>
-          <select id="colFilialNr"></select>
-        </div>
-        <div class="field">
-          <label for="colStrasse">Straße *</label>
-          <select id="colStrasse"></select>
-        </div>
-        <div class="field">
-          <label for="colPlz">PLZ *</label>
-          <select id="colPlz"></select>
-        </div>
-        <div class="field">
-          <label for="colOrt">Ort *</label>
-          <select id="colOrt"></select>
-        </div>
-        <div class="field">
-          <label for="colNameErw">Namens-Erweiterung</label>
-          <select id="colNameErw"></select>
+    <!-- Step 3: Column mapping + preview -->
+    <div class="step" style="animation-delay:.1s">
+      <div class="step-spine">
+        <div class="step-num">3</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-body">
+        <p class="step-title">Spalten-Zuordnung</p>
+        <div class="panel">
+          <div class="col-grid">
+            <div class="field">
+              <label for="colFilialNr">Filial-Nr <span style="color:var(--red)">*</span></label>
+              <select id="colFilialNr"></select>
+            </div>
+            <div class="field">
+              <label for="colStrasse">Straße <span style="color:var(--red)">*</span></label>
+              <select id="colStrasse"></select>
+            </div>
+            <div class="field">
+              <label for="colPlz">PLZ <span style="color:var(--red)">*</span></label>
+              <select id="colPlz"></select>
+            </div>
+            <div class="field">
+              <label for="colOrt">Ort <span style="color:var(--red)">*</span></label>
+              <select id="colOrt"></select>
+            </div>
+            <div class="field" style="grid-column:1/-1">
+              <label for="colNameErw">Namens-Erweiterung <span style="text-transform:none;letter-spacing:0;font-weight:400">(optional)</span></label>
+              <select id="colNameErw"></select>
+            </div>
+          </div>
+
+          <div id="cardPreviewTable" class="hidden" style="margin-top:.9rem;">
+            <p class="sub-label">Datenvorschau · erste 10 Zeilen</p>
+            <div id="previewTableWrap"></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="card" id="cardPreviewTable" style="display:none;">
-      <h2>3b · Datenvorschau (erste 10 Zeilen)</h2>
-      <div id="previewTableWrap"></div>
-    </div>
-
-    <div class="card">
-      <h2>4 · Sync-Parameter</h2>
-      <div class="grid-2">
-        <div class="field">
-          <label for="gesellschaft">Gesellschaft *</label>
-          <input type="text" id="gesellschaft" placeholder="z. B. Lidl DE" />
-        </div>
-        <div class="field">
-          <label for="responseSet">Response-Set (optional)</label>
-          <input type="text" id="responseSet" placeholder="Name des Response-Sets" />
+    <!-- Step 4: Sync params -->
+    <div class="step" style="animation-delay:.15s">
+      <div class="step-spine">
+        <div class="step-num">4</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-body">
+        <p class="step-title">Sync-Parameter</p>
+        <div class="panel">
+          <div class="grid-2" style="margin-bottom:.7rem;">
+            <div class="field">
+              <label for="gesellschaft">Gesellschaft <span style="color:var(--red)">*</span></label>
+              <input type="text" id="gesellschaft" placeholder="z. B. Lidl DE" />
+            </div>
+            <div class="field">
+              <label for="responseSet">Response-Set <span style="text-transform:none;letter-spacing:0;font-weight:400">(optional)</span></label>
+              <input type="text" id="responseSet" placeholder="Name des Response-Sets" />
+            </div>
+          </div>
+          <label for="dryRun" class="checkbox-row">
+            <input type="checkbox" id="dryRun" checked />
+            <span>Dry-Run — kein echter Schreibzugriff</span>
+          </label>
         </div>
       </div>
-      <div class="checkbox-row">
-        <input type="checkbox" id="dryRun" checked />
-        <label for="dryRun">Dry-Run (kein echter Schreibzugriff)</label>
+    </div>
+
+    <!-- Step 5: Start -->
+    <div class="step" style="animation-delay:.2s">
+      <div class="step-spine">
+        <div class="step-num">5</div>
+      </div>
+      <div class="step-body">
+        <p class="step-title">Sync starten</p>
+        <div class="panel">
+          <button class="btn btn-primary" id="btnSync" disabled>Sync starten</button>
+          <div id="syncResult" style="margin-top:1rem;"></div>
+        </div>
       </div>
     </div>
 
-    <div class="card">
-      <h2>5 · Sync starten</h2>
-      <button class="btn btn-success" id="btnSync" disabled>
-        Sync starten
-      </button>
-      <div id="syncResult" style="margin-top:1rem;"></div>
-    </div>
   </div>
 </div>
 
 <script>
-  // ─── State ────────────────────────────────────────────────────────────────────
-  let preview = null; // WorkbookPreview JSON
+  let preview = null;
 
-  // ─── Elements ────────────────────────────────────────────────────────────────
   const excelFile        = document.getElementById('excelFile');
+  const fileDrop         = document.getElementById('fileDrop');
+  const fileNameEl       = document.getElementById('fileName');
   const btnPreview       = document.getElementById('btnPreview');
   const previewStatus    = document.getElementById('previewStatus');
   const sectionConfig    = document.getElementById('section-config');
   const sheetSelect      = document.getElementById('sheetSelect');
   const startRow         = document.getElementById('startRow');
   const colSelects       = {
-    filialNr:   document.getElementById('colFilialNr'),
-    strasse:    document.getElementById('colStrasse'),
-    plz:        document.getElementById('colPlz'),
-    ort:        document.getElementById('colOrt'),
-    nameErw:    document.getElementById('colNameErw'),
+    filialNr: document.getElementById('colFilialNr'),
+    strasse:  document.getElementById('colStrasse'),
+    plz:      document.getElementById('colPlz'),
+    ort:      document.getElementById('colOrt'),
+    nameErw:  document.getElementById('colNameErw'),
   };
   const gesellschaft     = document.getElementById('gesellschaft');
   const responseSet      = document.getElementById('responseSet');
@@ -349,7 +714,6 @@
   const cardPreviewTable = document.getElementById('cardPreviewTable');
   const previewTableWrap = document.getElementById('previewTableWrap');
 
-  // ─── Config-Prefill aus AppSettings ──────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async () => {
     try {
       const res = await fetch('/api/config');
@@ -360,54 +724,67 @@
     } catch {}
   });
 
-  // ─── File-Input ───────────────────────────────────────────────────────────────
   excelFile.addEventListener('change', () => {
-    btnPreview.disabled = !excelFile.files?.length;
-    sectionConfig.style.display = 'none';
+    const hasFile = !!excelFile.files?.length;
+    btnPreview.disabled = !hasFile;
+    sectionConfig.classList.remove('visible');
     preview = null;
     syncResult.innerHTML = '';
+    setStatus('', '');
+
+    if (hasFile) {
+      fileNameEl.textContent = excelFile.files[0].name;
+      fileNameEl.classList.remove('hidden');
+      fileDrop.classList.add('has-file');
+    } else {
+      fileNameEl.classList.add('hidden');
+      fileDrop.classList.remove('has-file');
+    }
   });
 
-  // ─── Vorschau laden ───────────────────────────────────────────────────────────
   btnPreview.addEventListener('click', async () => {
     if (!excelFile.files?.length) return;
-
     btnPreview.disabled = true;
     btnPreview.innerHTML = '<span class="spinner"></span> Lade…';
-    previewStatus.textContent = '';
+    setStatus('', '');
 
     try {
       const fd = new FormData();
       fd.append('file', excelFile.files[0]);
-
       const res = await fetch('/api/excel/preview', { method: 'POST', body: fd });
-      if (!res.ok) {
-        const msg = await res.text();
-        throw new Error(msg || res.statusText);
-      }
-
+      if (!res.ok) throw new Error((await res.text()) || res.statusText);
       preview = await res.json();
       applyPreview();
-      sectionConfig.style.display = 'block';
-      previewStatus.textContent = `✓ ${preview.worksheets.length} Worksheet(s) geladen.`;
+      // Slight delay so the transition feels intentional
+      requestAnimationFrame(() => {
+        sectionConfig.classList.add('visible');
+      });
+      setStatus(`✓ ${preview.worksheets.length} Worksheet(s) geladen`, 'ok');
     } catch (e) {
-      previewStatus.textContent = '✗ ' + e.message;
+      setStatus('✗ ' + e.message, 'err');
     } finally {
       btnPreview.disabled = false;
       btnPreview.innerHTML = 'Vorschau neu laden';
     }
   });
 
+  function setStatus(text, cls) {
+    previewStatus.textContent = text;
+    previewStatus.className = 'status' + (cls ? ' ' + cls : '');
+  }
+
   function applyPreview() {
-    // Worksheets füllen
     sheetSelect.innerHTML = preview.worksheets
       .map(ws => `<option value="${ws.index}">${escHtml(ws.name)}</option>`)
       .join('');
     fillColumnDropdowns(0);
   }
 
-  sheetSelect.addEventListener('change', () => {
-    fillColumnDropdowns(Number(sheetSelect.value));
+  sheetSelect.addEventListener('change', () => fillColumnDropdowns(Number(sheetSelect.value)));
+
+  startRow.addEventListener('change', () => {
+    const ws = preview?.worksheets.find(w => w.index === Number(sheetSelect.value));
+    if (ws) renderPreviewTable(ws);
   });
 
   for (const sel of Object.values(colSelects)) {
@@ -420,50 +797,50 @@
   function fillColumnDropdowns(sheetIdx) {
     const ws = preview.worksheets.find(w => w.index === sheetIdx);
     if (!ws) return;
-
     const options = ws.headers
       .map((h, i) => `<option value="${i}">${i}: ${escHtml(h)}</option>`)
       .join('');
-
-    // Sinnvolle Defaults anhand von Header-Namen erraten
     const defaults = guessDefaults(ws.headers);
-
     for (const [key, sel] of Object.entries(colSelects)) {
       sel.innerHTML = options;
       if (defaults[key] !== undefined) sel.value = String(defaults[key]);
     }
-
     renderPreviewTable(ws);
     validateForm();
   }
 
   function renderPreviewTable(ws) {
     if (!ws.rows || ws.rows.length === 0) {
-      cardPreviewTable.style.display = 'none';
+      cardPreviewTable.classList.add('hidden');
+      return;
+    }
+    const activeCols = new Set(Object.values(colSelects).map(s => Number(s.value)));
+
+    const offset = Math.max(0, Number(startRow.value) - 2);
+    const visibleRows = ws.rows.slice(offset, offset + 10);
+
+    if (visibleRows.length === 0) {
+      cardPreviewTable.classList.add('hidden');
       return;
     }
 
-    const activeCols = new Set(Object.values(colSelects).map(s => Number(s.value)));
-
-    let html = '<div class="preview-table-wrap"><table class="preview-table"><thead><tr>';
+    let html = '<div class="preview-scroll"><table class="preview-table"><thead><tr>';
+    html += '<th style="color:var(--text-soft);width:2.75rem;text-align:right">#</th>';
     ws.headers.forEach((h, i) => {
-      const cls = activeCols.has(i) ? ' class="col-active"' : '';
-      html += `<th${cls}>${escHtml(h)}</th>`;
+      html += `<th${activeCols.has(i) ? ' class="col-active"' : ''}>${escHtml(h)}</th>`;
     });
     html += '</tr></thead><tbody>';
-
-    for (const row of ws.rows) {
-      html += '<tr>';
+    visibleRows.forEach((row, idx) => {
+      const excelRow = Number(startRow.value) + idx;
+      html += `<tr><td style="color:var(--text-soft);text-align:right;font-variant-numeric:tabular-nums">${excelRow}</td>`;
       row.forEach((cell, i) => {
-        const cls = activeCols.has(i) ? ' class="col-active"' : '';
-        html += `<td${cls} title="${escHtml(cell)}">${escHtml(cell)}</td>`;
+        html += `<td${activeCols.has(i) ? ' class="col-active"' : ''} title="${escHtml(cell)}">${escHtml(cell)}</td>`;
       });
       html += '</tr>';
-    }
-
+    });
     html += '</tbody></table></div>';
     previewTableWrap.innerHTML = html;
-    cardPreviewTable.style.display = 'block';
+    cardPreviewTable.classList.remove('hidden');
   }
 
   function guessDefaults(headers) {
@@ -478,17 +855,14 @@
     };
   }
 
-  // ─── Formularvalidierung ──────────────────────────────────────────────────────
   gesellschaft.addEventListener('input', validateForm);
 
   function validateForm() {
     btnSync.disabled = !(preview && gesellschaft.value.trim());
   }
 
-  // ─── Sync starten ─────────────────────────────────────────────────────────────
   btnSync.addEventListener('click', async () => {
     if (!excelFile.files?.length || !gesellschaft.value.trim()) return;
-
     btnSync.disabled = true;
     btnSync.innerHTML = '<span class="spinner"></span> Sync läuft…';
     syncResult.innerHTML = '';
@@ -499,7 +873,7 @@
       fd.append('gesellschaft',       gesellschaft.value.trim());
       fd.append('responseSet',        responseSet.value.trim());
       fd.append('sheetIndex',         sheetSelect.value);
-      fd.append('startRow',           String(Number(startRow.value) - 1)); // UI ist 1-basiert → 0-basiert
+      fd.append('startRow',           String(Number(startRow.value) - 1));
       fd.append('filialNrCol',        colSelects.filialNr.value);
       fd.append('strasseCol',         colSelects.strasse.value);
       fd.append('plzCol',             colSelects.plz.value);
@@ -507,14 +881,9 @@
       fd.append('nameErweiterungCol', colSelects.nameErw.value);
       fd.append('dryRun',             dryRun.checked ? 'true' : 'false');
 
-      const res = await fetch('/api/sync', { method: 'POST', body: fd });
+      const res  = await fetch('/api/sync', { method: 'POST', body: fd });
       const json = await res.json();
-
-      if (!res.ok) {
-        renderError(json.error || JSON.stringify(json));
-        return;
-      }
-
+      if (!res.ok) { renderError(json.error || JSON.stringify(json)); return; }
       renderResult(json);
     } catch (e) {
       renderError(e.message);
@@ -525,38 +894,31 @@
   });
 
   function renderResult(data) {
-    const isDry    = data.dryRun;
-    const syncRep  = data.syncReport;
-    const rsRep    = data.responseSetReport;
-
-    let html = `<div class="result-box ${syncRep.failed > 0 ? 'error' : 'success'}">`;
-    html += `<h3>Sync abgeschlossen${isDry ? '<span class="tag-dryrun">DRY-RUN</span>' : ''}</h3>`;
-    html += `<div class="stats">
-      <div class="stat created"><div class="num">${syncRep.created}</div><div class="lbl">Erstellt</div></div>
-      <div class="stat skipped"><div class="num">${syncRep.skipped}</div><div class="lbl">Übersprungen</div></div>
-      <div class="stat failed"><div class="num">${syncRep.failed}</div><div class="lbl">Fehler</div></div>
-    </div>`;
-
-    if (rsRep) {
-      html += `<hr style="margin:.75rem 0;border-color:#ddd">`;
-      html += `<p style="font-size:.85rem;font-weight:600;margin-bottom:.5rem">Response-Set</p>`;
-      html += `<div class="stats">
-        <div class="stat created"><div class="num">${rsRep.created}</div><div class="lbl">Erstellt</div></div>
-        <div class="stat skipped"><div class="num">${rsRep.skipped}</div><div class="lbl">Übersprungen</div></div>
-        <div class="stat failed"><div class="num">${rsRep.failed}</div><div class="lbl">Fehler</div></div>
-      </div>`;
+    const { dryRun: isDry, syncReport: sr, responseSetReport: rs } = data;
+    let html = `<div class="result-panel ${sr.failed > 0 ? 'error' : 'success'}">`;
+    html += `<h3>Sync abgeschlossen${isDry ? '<span class="badge-dryrun">Dry-Run</span>' : ''}</h3>`;
+    html += statRow(sr);
+    if (rs) {
+      html += `<div class="divider"></div><p class="sub-label">Response-Set</p>`;
+      html += statRow(rs);
     }
-
     if (data.log?.length) {
       html += `<div class="log-area">${escHtml(data.log.join('\n'))}</div>`;
     }
-
     html += `</div>`;
     syncResult.innerHTML = html;
   }
 
+  function statRow(r) {
+    return `<div class="stats">
+      <div class="stat created"><div class="num">${r.created}</div><div class="lbl">Erstellt</div></div>
+      <div class="stat skipped"><div class="num">${r.skipped}</div><div class="lbl">Übersprungen</div></div>
+      <div class="stat failed"><div class="num">${r.failed}</div><div class="lbl">Fehler</div></div>
+    </div>`;
+  }
+
   function renderError(msg) {
-    syncResult.innerHTML = `<div class="result-box error"><h3>Fehler</h3><p style="font-size:.85rem">${escHtml(msg)}</p></div>`;
+    syncResult.innerHTML = `<div class="result-panel error"><h3>Fehler</h3><p style="font-size:.9rem;color:var(--text-mid)">${escHtml(msg)}</p></div>`;
   }
 
   function escHtml(s) {

@@ -12,7 +12,7 @@ public record WorkbookPreview(IReadOnlyList<WorksheetPreview> Worksheets);
 
 public sealed class ExcelPreviewService
 {
-    private const int PreviewRowCount = 10;
+    private const int PreviewRowCount = 50;
 
     public WorkbookPreview GetPreview(Stream excelStream)
     {
